@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prava Test UZ</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#eef2f7;color:#111827}
+.app{max-width:500px;min-height:100vh;margin:auto;background:white}
+header{background:#111827;color:white;padding:25px 20px;border-radius:0 0 25px 25px}
+header h1{margin:0;font-size:27px}header p{margin:7px 0 0;color:#cbd5e1}
+main{padding:18px}.card{background:white;border:1px solid #e5e7eb;border-radius:18px;padding:18px;margin-bottom:15px;box-shadow:0 5px 20px rgba(0,0,0,.05)}
+.btn{width:100%;border:0;border-radius:14px;padding:16px;margin:6px 0;font-size:16px;font-weight:bold;cursor:pointer;background:#2563eb;color:white}.btn.secondary{background:#e8efff;color:#1d4ed8}.btn:disabled{opacity:.5}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px}.stat{background:#f8fafc;padding:17px;text-align:center;border-radius:15px}.stat b{display:block;font-size:25px;margin-bottom:5px}
+.hidden{display:none}.top{display:flex;justify-content:space-between;align-items:center}.timer{color:#dc2626;font-weight:bold}
+.progress{height:8px;background:#e5e7eb;border-radius:10px;overflow:hidden;margin:15px 0}.progress-bar{height:100%;width:0%;background:#2563eb;transition:.3s}
+.question{font-size:20px;font-weight:bold;line-height:1.4;margin-bottom:20px}.option{display:block;width:100%;text-align:left;padding:15px;margin:8px 0;border:2px solid #e5e7eb;background:#f8fafc;border-radius:13px;font-size:16px;cursor:pointer}.option:hover{background:#eef2ff}
+.option.correct{background:#dcfce7;border-color:#16a34a}.option.wrong{background:#fee2e2;border-color:#dc2626}.badge{display:inline-block;padding:6px 10px;background:#dbeafe;color:#1d4ed8;border-radius:20px;font-size:12px;font-weight:bold}
+.result-icon{font-size:55px;text-align:center}.topic{padding:18px;border:1px solid #e5e7eb;border-radius:15px;margin-bottom:10px;cursor:pointer}.topic:hover{background:#f8fafc}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1>🚗 Prava Test UZ</h1><p>B toifa • Nazariy imtihon</p></header>
+<main>
+<section id="home">
+<div class="card"><span class="badge">B TOIFA</span><h2>Yo‘l harakati qoidalari</h2><p>Bilimingizni sinab ko‘ring va imtihonga tayyorlaning.</p></div>
+<div class="stats"><div class="stat"><b id="bestScore">0%</b>Eng yaxshi natija</div><div class="stat"><b id="testCount">0</b>Testlar</div></div>
+<button class="btn" onclick="startTest()">📝 Testni boshlash</button>
+<button class="btn secondary" onclick="showTopics()">📚 Mavzular</button>
+<button class="btn secondary" onclick="showMistakes()">❌ Xatolarim</button>
+</section>
+<section id="quiz" class="hidden">
+<div class="top"><b id="questionNumber">1 / 20</b><span class="timer" id="timer">25:00</span></div>
+<div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+<div class="card"><div class="question" id="question">Savol</div><div id="answers"></div></div>
+<button class="btn" id="nextButton" onclick="nextQuestion()" disabled>Keyingi →</button>
+</section>
+<section id="result" class="hidden">
+<div class="card"><div class="result-icon" id="resultIcon">🎉</div><h2 style="text-align:center" id="resultTitle">Natija</h2><p style="text-align:center" id="resultText">-</p>
+<div class="stats"><div class="stat"><b id="correctResult">0</b>To‘g‘ri</div><div class="stat"><b id="wrongResult">0</b>Xato</div></div></div>
+<button class="btn" onclick="startTest()">🔄 Qayta ishlash</button><button class="btn secondary" onclick="goHome()">🏠 Bosh sahifa</button>
+</section>
+<section id="topics" class="hidden"><h2>📚 Mavzular</h2><div id="topicList"></div><button class="btn secondary" onclick="goHome()">← Orqaga</button></section>
+<section id="mistakes" class="hidden"><h2>❌ Xatolarim</h2><div id="mistakeList"></div><button class="btn secondary" onclick="goHome()">← Orqaga</button></section>
+</main></div>
+<script>
+const questions=[
+{question:"Svetoforning qizil chirog‘i yonganda haydovchi nima qilishi kerak?",answers:["Tezlikni kamaytirib o‘tish","To‘xtash chizig‘i oldida to‘xtash","Yo‘l bo‘sh bo‘lsa o‘tish","Signal berib o‘tish"],correct:1,topic:"Svetofor"},
+{question:"Yashil svetofor signali nimani bildiradi?",answers:["Harakatlanish taqiqlangan","Harakatlanishga ruxsat","Faqat piyodalarga ruxsat","To‘xtash kerak"],correct:1,topic:"Svetofor"},
+{question:"Piyodalar o‘tish joyida piyoda yo‘lni kesib o‘tayotgan bo‘lsa haydovchi nima qiladi?",answers:["Tezlikni oshiradi","Signal beradi","Yo‘l beradi","Chapga buriladi"],correct:2,topic:"Piyodalar"},
+{question:"Taqiqlovchi yo‘l belgilarining asosiy shakli qanday?",answers:["Doira","Uchburchak","To‘rtburchak","Kvadrat"],correct:0,topic:"Yo‘l belgilari"},
+{question:"Ogohlantiruvchi yo‘l belgilarining shakli odatda qanday?",answers:["Doira","Uchburchak","Kvadrat","To‘rtburchak"],correct:1,topic:"Yo‘l belgilari"},
+{question:"Uzlukli oq yo‘l chizig‘i nimani bildiradi?",answers:["Harakatni doim taqiqlaydi","Harakat bo‘laklarini ajratadi","Faqat avtobuslar uchun","To‘xtash joyini"],correct:1,topic:"Yo‘l chiziqlari"},
+{question:"Haydovchi burilishdan oldin nima qilishi kerak?",answers:["Burilish signalini yoqishi","Tezlikni oshirishi","Signalni o‘chirishi","Faqat signal chalishi"],correct:0,topic:"Umumiy qoidalar"},
+{question:"Haydovchi transport vositasini boshqarayotganda xavfsizlik kamaridan foydalanishi kerakmi?",answers:["Ha","Faqat shahardan tashqarida","Faqat kechasi","Yo‘q"],correct:0,topic:"Umumiy qoidalar"},
+{question:"Transport vositasini boshqarishda telefondan qo‘lda foydalanish xavfsizmi?",answers:["Ha","Faqat tezlik past bo‘lsa","Yo‘q","Faqat svetoforda"],correct:2,topic:"Umumiy qoidalar"},
+{question:"Ko‘rinish yomonlashganda haydovchi nima qilishi kerak?",answers:["Tezlikni oshirishi","Tezlikni kamaytirishi","Signal berishi","Yo‘l chetiga chiqishi"],correct:1,topic:"Tezlik"},
+{question:"Yo‘l bo‘sh bo‘lsa ham qizil svetoforda harakatlanish mumkinmi?",answers:["Ha","Yo‘q","Faqat kechasi","Faqat signal bilan"],correct:1,topic:"Svetofor"},
+{question:"Chorraha tartibga solinmagan bo‘lsa haydovchi nimaga e’tibor berishi kerak?",answers:["Yo‘l belgilariga","Faqat tezlikka","Faqat signalga","Hech narsaga"],correct:0,topic:"Chorrahalar"},
+{question:"To‘xtash joyida transport vositasini yo‘l harakatiga xalaqit beradigan tarzda qoldirish mumkinmi?",answers:["Ha","Yo‘q","5 daqiqaga mumkin","Faqat kechasi mumkin"],correct:1,topic:"To‘xtash"},
+{question:"Piyodalar yo‘lakchasi asosan kimlar uchun mo‘ljallangan?",answers:["Avtomobillar","Piyodalar","Mototsikllar","Yuk mashinalari"],correct:1,topic:"Piyodalar"},
+{question:"Haydovchi yo‘l sharoitiga mos tezlik tanlashi kerakmi?",answers:["Ha","Yo‘q","Faqat yomg‘irda","Faqat shaharda"],correct:0,topic:"Tezlik"},
+{question:"Avtomobil boshqarishdan oldin haydovchi nimani tekshirishi kerak?",answers:["Transport vositasining texnik holatini","Telefonini","Radiostansiyani","Faqat oynalarni"],correct:0,topic:"Umumiy qoidalar"},
+{question:"Chorraha yaqinida haydovchi nima qilishi kerak?",answers:["Ehtiyotkorlikni oshirishi","Tezlikni maksimal qilishi","Ko‘zini yumishi","Signalni doim bosishi"],correct:0,topic:"Chorrahalar"},
+{question:"Yo‘l belgilariga rioya qilish kim uchun majburiy?",answers:["Faqat yangi haydovchilar uchun","Barcha yo‘l harakati qatnashchilari uchun","Faqat piyodalar uchun","Faqat yuk mashinalari uchun"],correct:1,topic:"Yo‘l belgilari"},
+{question:"Avtomobilni boshqarishda xavfsizlik kamarini taqishning asosiy maqsadi nima?",answers:["Jarimani kamaytirish","Xavfsizlikni oshirish","Tezlikni oshirish","Yonilg‘ini tejash"],correct:1,topic:"Umumiy qoidalar"},
+{question:"Piyoda o‘tish joyiga yaqinlashganda haydovchi qanday harakat qilishi kerak?",answers:["Ehtiyotkorlik bilan","Tezlikni oshirib","Yo‘l bermasdan","Faqat signal berib"],correct:0,topic:"Piyodalar"}
+];
+let currentQuestion=0,score=0,selected=false,timeLeft=25*60,timerInterval;
+let mistakes=JSON.parse(localStorage.getItem("pravaMistakes")||"[]");
+function updateHome(){document.getElementById("bestScore").innerText=(localStorage.getItem("bestScore")||0)+"%";document.getElementById("testCount").innerText=localStorage.getItem("testCount")||0}
+function hideAll(){document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"))}
+function goHome(){clearInterval(timerInterval);hideAll();document.getElementById("home").classList.remove("hidden");updateHome()}
+function startTest(){hideAll();document.getElementById("quiz").classList.remove("hidden");currentQuestion=0;score=0;selected=false;timeLeft=25*60;clearInterval(timerInterval);timerInterval=setInterval(updateTimer,1000);showQuestion()}
+function updateTimer(){timeLeft--;let m=Math.floor(timeLeft/60),s=timeLeft%60;document.getElementById("timer").innerText=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");if(timeLeft<=0)finishTest()}
+function showQuestion(){selected=false;const q=questions[currentQuestion];document.getElementById("questionNumber").innerText=`${currentQuestion+1} / ${questions.length}`;document.getElementById("question").innerText=q.question;document.getElementById("progressBar").style.width=`${currentQuestion/questions.length*100}%`;const answers=document.getElementById("answers");answers.innerHTML="";q.answers.forEach((answer,index)=>{const button=document.createElement("button");button.className="option";button.innerText=`${String.fromCharCode(65+index)}) ${answer}`;button.onclick=()=>chooseAnswer(index,button);answers.appendChild(button)});document.getElementById("nextButton").disabled=true}
+function chooseAnswer(index,button){if(selected)return;selected=true;const q=questions[currentQuestion],all=document.querySelectorAll(".option");all[q.correct].classList.add("correct");if(index===q.correct)score++;else{button.classList.add("wrong");saveMistake(q)}document.getElementById("nextButton").disabled=false}
+function saveMistake(q){if(!mistakes.some(item=>item.question===q.question)){mistakes.push(q);localStorage.setItem("pravaMistakes",JSON.stringify(mistakes))}}
+function nextQuestion(){if(!selected)return;if(currentQuestion<questions.length-1){currentQuestion++;showQuestion()}else finishTest()}
+function finishTest(){clearInterval(timerInterval);const percent=Math.round(score/questions.length*100),oldBest=Number(localStorage.getItem("bestScore")||0);if(percent>oldBest)localStorage.setItem("bestScore",percent);localStorage.setItem("testCount",Number(localStorage.getItem("testCount")||0)+1);hideAll();document.getElementById("result").classList.remove("hidden");document.getElementById("correctResult").innerText=score;document.getElementById("wrongResult").innerText=questions.length-score;document.getElementById("resultText").innerText=`Natijangiz: ${percent}%`;if(percent>=80){document.getElementById("resultIcon").innerText="🎉";document.getElementById("resultTitle").innerText="Imtihondan o'tdingiz!"}else{document.getElementById("resultIcon").innerText="😕";document.getElementById("resultTitle").innerText="Yana mashq qiling"}}
+function showTopics(){hideAll();document.getElementById("topics").classList.remove("hidden");const topics=[...new Set(questions.map(q=>q.topic))],list=document.getElementById("topicList");list.innerHTML="";topics.forEach(topic=>{const count=questions.filter(q=>q.topic===topic).length,div=document.createElement("div");div.className="topic";div.innerHTML=`<b>📌 ${topic}</b><br><small>${count} ta savol</small>`;list.appendChild(div)})}
+function showMistakes(){hideAll();document.getElementById("mistakes").classList.remove("hidden");const list=document.getElementById("mistakeList");list.innerHTML="";if(!mistakes.length){list.innerHTML="<div class='card'>👍 Hozircha xato savollar yo‘q.</div>";return}mistakes.forEach((q,index)=>{const div=document.createElement("div");div.className="card";div.innerHTML=`<b>${index+1}. ${q.question}</b><p>To‘g‘ri javob: <strong>${String.fromCharCode(65+q.correct)}) ${q.answers[q.correct]}</strong></p>`;list.appendChild(div)})}
+updateHome();
+</script>
+</body>
+</html>
